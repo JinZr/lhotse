@@ -132,6 +132,7 @@ def prepare_aishell2(
 
         for audio_path in wav_path.rglob("**/*.wav"):
             idx = audio_path.stem.split("/")[-1] + ".wav"
+            print(idx)
             speaker = audio_path.parts[-2]
             if idx not in transcript_dict:
                 logging.warning(f"No transcript: {idx}")
