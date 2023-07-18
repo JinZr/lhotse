@@ -120,7 +120,7 @@ def prepare_aishell2(
         transcript_dict = {}
         with open(transcript_path, "r", encoding="utf-8") as f:
             for line in f:
-                idx_transcript = line.split()
+                idx_transcript = line.split().split("/")[-1]
                 content = " ".join(idx_transcript[1:])
                 content = text_normalize(content)
                 transcript_dict[idx_transcript[0]] = content
@@ -131,8 +131,7 @@ def prepare_aishell2(
         )
 
         for audio_path in wav_path.rglob("**/*.wav"):
-
-            idx = audio_path.stem
+            idx = audio_path.stem.split("/")[-1]
             speaker = audio_path.parts[-2]
             if idx not in transcript_dict:
                 logging.warning(f"No transcript: {idx}")
