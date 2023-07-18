@@ -120,10 +120,10 @@ def prepare_aishell2(
         transcript_dict = {}
         with open(transcript_path, "r", encoding="utf-8") as f:
             for line in f:
-                idx_transcript = line.split().split("/")[-1]
+                idx_transcript = line.split()
                 content = " ".join(idx_transcript[1:])
                 content = text_normalize(content)
-                transcript_dict[idx_transcript[0]] = content
+                transcript_dict[idx_transcript[0].split("/")[-1]] = content
 
         supervisions = []
         recordings = RecordingSet.from_dir(
