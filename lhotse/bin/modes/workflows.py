@@ -181,6 +181,64 @@ def align_with_torchaudio(
 )
 @click.argument("out_cuts", type=click.Path(allow_dash=True))
 @click.option(
+    "-n",
+    "--bundle-name",
+    default="WAV2VEC2_ASR_BASE_960H",
+    help="One of torchaudio pretrained 'bundle' variants (see: https://pytorch.org/audio/stable/pipelines.html)",
+)
+@click.option(
+    "-d", "--device", default="cpu", help="Device on which to run the inference."
+)
+@click.option(
+    "--normalize-text/--dont-normalize-text",
+    default=True,
+    help="By default, we'll try to normalize the text by making it uppercase and discarding symbols "
+    "outside of model's character level vocabulary. If this causes issues, "
+    "turn the option off and normalize the text yourself.",
+)
+def align_with_torchaudio_libriheavy(
+    in_cuts: str,
+    out_cuts: str,
+    bundle_name: str,
+    device: str,
+    normalize_text: bool,
+):
+    """
+    Use a pretrained ASR model from torchaudio to force align IN_CUTS (a Lhotse CutSet)
+    and write the results to OUT_CUTS.
+    It will attach word-level alignment information (start, end, and score) to the
+    supervisions in each cut.
+
+    This is based on a tutorial from torchaudio:
+    https://pytorch.org/audio/stable/tutorials/forced_alignment_tutorial.html
+
+    Note: this is an experimental feature of Lhotse, and is not guaranteed to yield
+    high quality of data.
+    """
+    from lhotse import align_with_torchaudio_libriheavy as align_with_torchaudio_
+
+    cuts = load_manifest_lazy_or_eager(in_cuts)
+
+    with CutSet.open_writer(out_cuts) as writer:
+        for cut in tqdm(
+            align_with_torchaudio_(
+                cuts,
+                bundle_name=bundle_name,
+                device=device,
+                normalize_text=normalize_text,
+            ),
+            total=len(cuts),
+            desc="Aligning",
+        ):
+            writer.write(cut, flush=True)
+
+
+@workflows.command()
+@click.argument(
+    "in_cuts", type=click.Path(exists=True, dir_okay=False, allow_dash=True)
+)
+@click.argument("out_cuts", type=click.Path(allow_dash=True))
+@click.option(
     "--method",
     type=click.Choice(["independent", "conversational"]),
     default="independent",
