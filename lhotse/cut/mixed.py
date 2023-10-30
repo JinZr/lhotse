@@ -1057,11 +1057,13 @@ class MixedCut(Cut):
             if not isinstance(t.cut, PaddingCut) and t.snr is None
         ][0]
         if first_cut.id != reference_cut.id:
-            reference_audio = reference_cut.load_audio()
+            reference_audio = (
+                reference_cut.load_audio() - reference_cut.load_audio().mean()
+            )
             reference_energy = audio_energy(reference_audio)
 
         mixer = AudioMixer(
-            self.tracks[0].cut.load_audio(),
+            self.tracks[0].cut.load_audio() - self.tracks[0].cut.load_audio().mean(),
             sampling_rate=self.tracks[0].cut.sampling_rate,
             reference_energy=reference_energy,
             base_offset=self.tracks[0].offset,
@@ -1071,7 +1073,7 @@ class MixedCut(Cut):
             if pos == reference_pos and reference_audio is not None:
                 audio = reference_audio  # manual caching to avoid duplicated I/O
             else:
-                audio = track.cut.load_audio()
+                audio = track.cut.load_audio() - track.cut.load_audio().mean()
             mixer.add_to_mix(
                 audio=audio,
                 snr=track.snr,
