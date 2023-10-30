@@ -123,7 +123,7 @@ class AudioMixer:
             if track.shape[0] > 1:
                 # Sum all channels of the track
                 track = np.sum(track, axis=0, keepdims=True)
-            mixed[:, offset : offset + track.shape[1]] += track - np.mean(track)
+            mixed[:, offset : offset + track.shape[1]] += track
         return mixed
 
     def add_to_mix(
