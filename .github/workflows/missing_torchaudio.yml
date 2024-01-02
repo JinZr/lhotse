@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: unit_tests
+name: missing_torchaudio
 
 on:
   push:
@@ -10,20 +10,14 @@ on:
     branches: [ master ]
 
 jobs:
-  unit_tests:
+  missing_torchaudio:
 
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
-          - python-version: "3.8"
-            torch-install-cmd: "pip install torch==1.8.2+cpu torchaudio==0.8.2 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html"
-          - python-version: "3.9"
-            torch-install-cmd: "pip install torch==1.8.2+cpu torchaudio==0.8.2 -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html"
-          - python-version: "3.10"
-            torch-install-cmd: "pip install torch==1.12.1 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cpu"
           - python-version: "3.11"
-            torch-install-cmd: "pip install torch==2.0 torchaudio==2.0 --extra-index-url https://download.pytorch.org/whl/cpu"
+            torch-install-cmd: "pip install torch==2.0 --extra-index-url https://download.pytorch.org/whl/cpu"
 
       fail-fast: false
 
@@ -48,15 +42,7 @@ jobs:
         # Force the installation of a CPU-only PyTorch
         ${{ matrix.torch-install-cmd }}
         # the torchaudio env var does nothing when torchaudio is installed, but doesn't require it's presence when it's not
-        pip install '.[tests]'
-        # Enable some optional tests
-        pip install h5py dill smart_open[http] kaldifeat kaldi_native_io webdataset==0.2.5 s3prl scipy nara_wpe pyloudnorm
-    - name: Install sph2pipe
+        LHOTSE_REQUIRE_TORCHAUDIO=0 pip install '.[tests]'
+    - name: Run basic tests only for missing torchaudio case
       run: |
-        lhotse install-sph2pipe  # Handle sphere files.
-    - name: Test with pytest and coverage
-      run: |
-        export TORCHAUDIO_USE_BACKEND_DISPATCHER=1
-        pytest --cov --forked -n auto test
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+        pytest test/test_missing_torchaudio.py

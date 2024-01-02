@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import click
 
 from lhotse.bin.modes import download, prepare
-from lhotse.recipes.icmcasr import prepare_icmcasr
+from lhotse.recipes.medical import download_medical, prepare_medical
 from lhotse.utils import Pathlike
 
 
@@ -17,22 +17,28 @@ from lhotse.utils import Pathlike
     default=1,
     help="How many threads to use (can give good speed-ups with slow disks).",
 )
-@click.option(
-    "--mic",
-    type=click.Choice(["ihm", "sdm", "mdm"]),
-    default="ihm",
-    help="Microphone type.",
-)
-def icmcasr(
+def medical(
     corpus_dir: Pathlike,
     output_dir: Optional[Pathlike] = None,
-    mic: str = "ihm",
     num_jobs: int = 1,
 ):
-    """ICMC-ASR data preparation."""
-    prepare_icmcasr(
+    """Medical data preparation."""
+    prepare_medical(
         corpus_dir=corpus_dir,
         output_dir=output_dir,
-        mic=mic,
         num_jobs=num_jobs,
+    )
+
+
+@download.command(context_settings=dict(show_default=True))
+@click.argument("target_dir", type=click.Path())
+@click.option("--force-download", is_flag=True, default=False, help="Force download")
+def medical(
+    target_dir: Pathlike,
+    force_download: Optional[bool] = False,
+):
+    """Medical download."""
+    download_medical(
+        target_dir=target_dir,
+        force_download=force_download,
     )

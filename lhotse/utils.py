@@ -6,6 +6,7 @@ import logging
 import math
 import os
 import random
+import secrets
 import sys
 import urllib
 import uuid
@@ -24,6 +25,7 @@ from typing import (
     Iterable,
     Iterator,
     List,
+    Literal,
     Optional,
     Sequence,
     Tuple,
@@ -35,7 +37,6 @@ import click
 import numpy as np
 import torch
 from tqdm.auto import tqdm
-from typing_extensions import Literal
 
 Pathlike = Union[Path, str]
 T = TypeVar("T")
@@ -1088,3 +1089,14 @@ class PythonLiteralOption(click.Option):
                 return val
         except:
             return None
+
+
+def is_torchaudio_available() -> bool:
+    return is_module_available("torchaudio")
+
+
+def build_rng(seed: Union[int, Literal["trng"]]) -> random.Random:
+    if seed == "trng":
+        return secrets.SystemRandom()
+    else:
+        return random.Random(seed)
